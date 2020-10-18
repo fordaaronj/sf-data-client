@@ -39,6 +39,9 @@
 	<div class="container">
 		<div class="row">
 			<h1>San Francisco Transcript Search</h1>
+			<small>
+				Search all transcripts from the <a href="https://sfgov.legistar.com/Calendar.aspx">San Francisco Board of Supervisors and Committee Meetings</a>
+			</small>
 		
 			<form on:submit|preventDefault={search}>
 				<input type="text" name="query" required>
