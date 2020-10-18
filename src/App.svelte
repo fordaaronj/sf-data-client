@@ -79,6 +79,10 @@
 					</tbody>
 				</table>
 			{/if}
+
+			<a href="https://github.com/fordaaronj/sf-data-client" target="_blank"><i class="fab fa-github"></i></a>
+			<a href="mailto:fordaaronj@gmail.com" target="_blank"><i class="fas fa-at"></i></a>
+			
 		</div>
 	</div>
 </main>
@@ -89,5 +93,10 @@
 	}
 	input {
 		width: 100%;
+	}
+	i {
+		font-size: 30px;
+		color: black;
+		margin-right: 15px;
 	}
 </style>
