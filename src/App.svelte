@@ -1,18 +1,48 @@
 <script>
 	import Loader from './Loader.svelte';
-	import { searchTranscripts } from './api';
+	import { searchTranscripts, searchTranscriptsAggSpeakers, searchTranscriptsAggYears } from './api';
 	import dayjs from 'dayjs';
+	import lodash from 'lodash';
+	import Chart from 'chart.js';
+
+	Chart.defaults.global.legend.display = false;
 
 	let searchResults;
 	let loading = false;
+	const searchLimit = 20;
 
 	const search = async (e) => {
 		searchResults = null;
 		loading = true;
-		searchResults = (await searchTranscripts(e.currentTarget[0].value)).map(r => {
+		const query = e.currentTarget[0].value;
+
+		searchResults = lodash.zipObject(['results', 'speakers', 'years'], await Promise.all([
+			searchTranscripts(query, searchLimit, 0), 
+			searchTranscriptsAggSpeakers(query),
+			searchTranscriptsAggYears(query)
+		]));
+
+		searchResults.results = searchResults.results.map(r => {
 			r.meeting.time_display = dayjs(r.meeting.time).format('MMM D, YYYY');
 			return r;
-		})
+		});
+
+		new Chart(document.getElementById('speakers-chart'), {
+			type: 'bar',
+			data: {
+				labels: searchResults.speakers.map(r => r.category),
+				datasets: [{data: searchResults.speakers.map(r => r.count)}]
+			}
+		});
+
+		new Chart(document.getElementById('years-chart'), {
+			type: 'bar',
+			data: {
+				labels: searchResults.years.map(r => r.category),
+				datasets: [{data: searchResults.years.map(r => r.count)}]
+			}
+		});
+		
 		loading = false;
 	}
 </script>
@@ -36,7 +66,16 @@
 			<form on:submit|preventDefault={search}>
 				<input type="text" name="query" required>
 			</form>
-
+		</div>
+		<div class="row">
+			<div class="six columns">
+				<canvas id="speakers-chart" width="400" height="200"></canvas>
+			</div>
+			<div class="six columns">
+				<canvas id="years-chart" width="400" height="200"></canvas>
+			</div>
+		</div>
+		<div class="row">
 			{#if searchResults}
 				<table>
 					<thead>
@@ -47,7 +86,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each searchResults as r, i}
+						{#each searchResults.results as r, i}
 						<tr>
 							<td>
 								{r.meeting.committee}<br>

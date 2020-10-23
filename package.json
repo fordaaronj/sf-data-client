@@ -16,7 +16,9 @@
     "svelte": "^3.0.0"
   },
   "dependencies": {
+    "chart.js": "^2.9.4",
     "dayjs": "^1.9.3",
+    "lodash": "^4.17.20",
     "sirv-cli": "^1.0.0"
   },
   "type": "module"
