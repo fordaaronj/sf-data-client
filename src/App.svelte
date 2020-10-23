@@ -22,14 +22,14 @@
 		} else {
 			page = 1;
 			searchResults = lodash.zipObject(['results', 'speakers', 'years'], await Promise.all([
-				searchTranscripts(searchTerm, searchLimit, searchLimit), 
+				searchTranscripts(searchTerm, searchLimit, 0), 
 				searchTranscriptsAggSpeakers(searchTerm),
 				searchTranscriptsAggYears(searchTerm)
 			]));
 	
 			totalResults = searchResults.years.map(r => r.count).reduce((a, b) => a + b, 0);
 		}
-
+		
 		searchResults.results = searchResults.results.map(r => {
 			r.meeting.time_display = dayjs(r.meeting.time).format('MMM D, YYYY');
 			return r;
