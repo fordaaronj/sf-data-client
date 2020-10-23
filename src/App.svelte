@@ -1,4 +1,5 @@
 <script>
+	import { onMount } from 'svelte'
 	import Loader from './Loader.svelte';
 	import { searchTranscripts, searchTranscriptsAggSpeakers, searchTranscriptsAggYears } from './api';
 	import dayjs from 'dayjs';
@@ -14,7 +15,21 @@
 	let totalResults;
 	const searchLimit = 20;
 
-	const search = async (changePage) => {
+	onMount(() => {
+		const searchParams = new URLSearchParams(window.location.search);
+		if (searchParams.get('q')) {
+			searchTerm = searchParams.get('q');
+			document.querySelector('input[name="query"]').value = searchTerm
+			search()
+		}
+	})
+
+
+	async function search (changePage) {
+		const searchParams = new URLSearchParams();
+		searchParams.set('q', searchTerm);
+		history.pushState(null, '', window.location.pathname + '?' + searchParams.toString());
+
 		loading = true;
 		if (changePage) {
 			page += changePage;
@@ -64,7 +79,7 @@
 		});
 	}
 
-	const newSearch = async (e) => {
+	async function newSearch (e) {
 		searchResults = null;
 		searchTerm = e.currentTarget[0].value;
 		search();
