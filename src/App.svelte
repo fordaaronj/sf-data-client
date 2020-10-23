@@ -8,24 +8,36 @@
 	Chart.defaults.global.legend.display = false;
 
 	let searchResults;
+	let searchTerm;
 	let loading = false;
+	let page = 1;
+	let totalResults;
 	const searchLimit = 20;
 
-	const search = async (e) => {
-		searchResults = null;
+	const search = async (changePage) => {
 		loading = true;
-		const query = e.currentTarget[0].value;
-
-		searchResults = lodash.zipObject(['results', 'speakers', 'years'], await Promise.all([
-			searchTranscripts(query, searchLimit, 0), 
-			searchTranscriptsAggSpeakers(query),
-			searchTranscriptsAggYears(query)
-		]));
+		if (changePage) {
+			page += changePage;
+			searchResults.results = await searchTranscripts(searchTerm, searchLimit, searchLimit * (page - 1));
+		} else {
+			page = 1;
+			searchResults = lodash.zipObject(['results', 'speakers', 'years'], await Promise.all([
+				searchTranscripts(searchTerm, searchLimit, searchLimit), 
+				searchTranscriptsAggSpeakers(searchTerm),
+				searchTranscriptsAggYears(searchTerm)
+			]));
+	
+			totalResults = searchResults.years.map(r => r.count).reduce((a, b) => a + b, 0);
+		}
 
 		searchResults.results = searchResults.results.map(r => {
 			r.meeting.time_display = dayjs(r.meeting.time).format('MMM D, YYYY');
 			return r;
 		});
+
+		loading = false;
+
+		if (changePage) return;
 
 		const intervalId = setInterval(() => {
 			const speakerChart = document.getElementById('speakers-chart');
@@ -50,8 +62,12 @@
 
 			clearInterval(intervalId);
 		});
-		
-		loading = false;
+	}
+
+	const newSearch = async (e) => {
+		searchResults = null;
+		searchTerm = e.currentTarget[0].value;
+		search();
 	}
 </script>
 
@@ -71,7 +87,7 @@
 				Search all transcripts from the <a href="https://sfgov.legistar.com/Calendar.aspx">San Francisco Board of Supervisors and Committee Meetings</a>
 			</small>
 		
-			<form on:submit|preventDefault={search}>
+			<form on:submit|preventDefault={newSearch}>
 				<input type="text" name="query" required>
 			</form>
 		</div>
@@ -79,9 +95,11 @@
 			{#if searchResults}
 				<div class="row">
 					<div class="six columns">
+						<label for="speakers-chart">Mentions by Speaker</label>
 						<canvas id="speakers-chart" width="400" height="200"></canvas>
 					</div>
 					<div class="six columns">
+						<label for="years-chart">Mentions by Year</label>
 						<canvas id="years-chart" width="400" height="200"></canvas>
 					</div>
 				</div>
@@ -115,7 +133,18 @@
 						{/each}
 					</tbody>
 				</table>
+				<div style="text-align: right">
+					Results {searchLimit * (page - 1) + 1} to {searchLimit * (page - 1) + searchResults.results.length} of {totalResults}<br>
+					{#if page > 1}
+						<button on:click={() => search(-1)}>Previous</button>
+					{/if}
+					{#if searchLimit * (page - 1) + searchResults.results.length < totalResults}
+						<button on:click={() => search(1)}>Next</button>
+					{/if}
+				</div>
 			{/if}
+
+			<hr>
 
 			<a href="https://github.com/fordaaronj/sf-data-client" target="_blank">
 				<img class="icon" src="svg/github.svg" alt="github">
