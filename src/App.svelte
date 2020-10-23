@@ -27,20 +27,28 @@
 			return r;
 		});
 
-		new Chart(document.getElementById('speakers-chart'), {
-			type: 'bar',
-			data: {
-				labels: searchResults.speakers.map(r => r.category),
-				datasets: [{data: searchResults.speakers.map(r => r.count)}]
-			}
-		});
+		const intervalId = setInterval(() => {
+			const speakerChart = document.getElementById('speakers-chart');
+			const yearsChart = document.getElementById('years-chart');
+			if (!(speakerChart && yearsChart)) return;
 
-		new Chart(document.getElementById('years-chart'), {
-			type: 'bar',
-			data: {
-				labels: searchResults.years.map(r => r.category),
-				datasets: [{data: searchResults.years.map(r => r.count)}]
-			}
+			new Chart(speakerChart, {
+				type: 'bar',
+				data: {
+					labels: searchResults.speakers.map(r => r.category),
+					datasets: [{data: searchResults.speakers.map(r => r.count)}]
+				}
+			});
+	
+			new Chart(yearsChart, {
+				type: 'bar',
+				data: {
+					labels: searchResults.years.map(r => r.category),
+					datasets: [{data: searchResults.years.map(r => r.count)}]
+				}
+			});
+
+			clearInterval(intervalId);
 		});
 		
 		loading = false;
@@ -68,15 +76,15 @@
 			</form>
 		</div>
 		<div class="row">
-			<div class="six columns">
-				<canvas id="speakers-chart" width="400" height="200"></canvas>
-			</div>
-			<div class="six columns">
-				<canvas id="years-chart" width="400" height="200"></canvas>
-			</div>
-		</div>
-		<div class="row">
 			{#if searchResults}
+				<div class="row">
+					<div class="six columns">
+						<canvas id="speakers-chart" width="400" height="200"></canvas>
+					</div>
+					<div class="six columns">
+						<canvas id="years-chart" width="400" height="200"></canvas>
+					</div>
+				</div>
 				<table>
 					<thead>
 						<tr>
