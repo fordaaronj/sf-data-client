@@ -22,9 +22,10 @@ async function searchTranscripts(search) {
             search_transcripts(args: {search: $search}, order_by: {meeting: {time: desc}, line_num: asc}) {
                 id
                 text
-                speakers
-                text_context
-                time
+                speaker_title
+                speaker_name
+                text
+                start_time
                 meeting {
                     committee
                     time
