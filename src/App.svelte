@@ -10,11 +10,10 @@
 		searchResults = null;
 		loading = true;
 		searchResults = (await searchTranscripts(e.currentTarget[0].value)).map(r => {
-			r.meeting.time_display = dayjs(r.meeting.time).format('MMM D, YYYY	');
+			r.meeting.time_display = dayjs(r.meeting.time).format('MMM D, YYYY');
 			return r;
 		})
 		loading = false;
-		console.log(searchResults);
 	}
 </script>
 
