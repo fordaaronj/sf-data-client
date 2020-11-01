@@ -3,8 +3,10 @@
 	import { loading } from './stores';
 	import Loader from './components/Loader.svelte';
 	import Transcripts from './components/Transcripts.svelte';
+	import Legislation from './components/Legislation.svelte';
 
 	let searchTerm;
+	let tab = 'legislation'
 
 	onMount(() => {
 		const searchParams = new URLSearchParams(window.location.search);
@@ -46,7 +48,13 @@
 		</div>
 
 		{#if searchTerm}
-			<Transcripts query={searchTerm}/>
+		<button class:button-primary={tab == 'transcripts'} on:click={e => tab = 'transcripts'}>Transcripts</button>
+		<button class:button-primary={tab == 'legislation'} on:click={e => tab = 'legislation'}>Legislation</button>
+			{#if tab == 'transcripts'}
+				<Transcripts query={searchTerm}/>
+			{:else if tab == 'legislation'}
+				<Legislation query={searchTerm}/>
+			{/if}
 		{/if}
 		<hr>
 	

@@ -64,4 +64,48 @@ async function searchTranscriptsAggYears(search) {
     return (await call(q, 'SearchTranscriptsAggYearsQuery', {search})).data.search_transcripts_agg_years;
 }
 
-export { searchTranscripts, searchTranscriptsAggSpeakers, searchTranscriptsAggYears }
+async function searchLegislation(search) {
+    const q = `
+        query SearchLegislationQuery($search: String) {
+            search_legislation(args: {search: $search}, order_by: {introduced_on: desc}, limit: 100) {
+                details_url
+                enactment_date
+                file_num
+                finalized_on
+                id
+                in_control
+                name
+                on_agenda
+                status
+                title
+                type
+                introduced_on
+                legislation_sponsors {
+                    person {
+                        id
+                        name
+                    }
+                }
+                legislation_histories(order_by: {date: desc}) {
+                    result
+                    action
+                    action_by
+                    action_url
+                    created_at
+                    date
+                    id
+                    votes {
+                        vote
+                        person {
+                            id
+                            name
+                        }
+                    }
+                }
+            }
+        }
+    `
+    return (await call(q, 'SearchLegislationQuery', {search})).data.search_legislation;
+}
+
+export { searchTranscripts, searchTranscriptsAggSpeakers, searchTranscriptsAggYears, searchLegislation }
