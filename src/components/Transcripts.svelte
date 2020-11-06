@@ -19,27 +19,27 @@
     $: search(query);
 
     async function search (query, changePage) {
-		loading.set(true);
+        loading.set(true);
 		if (changePage) {
-			page += changePage;
-			searchResults.transcripts = await searchTranscripts(query, searchLimit, searchLimit * (page - 1));
+            page += changePage;
+            searchResults.transcripts = await searchTranscripts(query, searchLimit, searchLimit * (page - 1));
 		} else {
             searchResults = null;
-			page = 1;
+            page = 1;
 			searchResults = lodash.zipObject(['transcripts', 'speakers', 'years'], await Promise.all([
 				searchTranscripts(query, searchLimit, 0), 
 				searchTranscriptsAggSpeakers(query),
 				searchTranscriptsAggYears(query)
-			]));
+            ]));
 	
-			totalResults = searchResults.years.map(r => r.count).reduce((a, b) => a + b, 0);
-		}
+			totalResults = searchResults.years.map(r => r.num).reduce((a, b) => a + b, 0);
+        }
 		
 		searchResults.transcripts = searchResults.transcripts.map(r => {
 			r.meeting.time_display = dayjs(r.meeting.time).format('MMM D, YYYY');
 			return r;
-		});
-
+        });
+        
 		loading.set(false);
 
 		if (changePage) return;
@@ -52,16 +52,16 @@
 			new Chart(speakerChart, {
 				type: 'bar',
 				data: {
-					labels: searchResults.speakers.map(r => r.category),
-					datasets: [{data: searchResults.speakers.map(r => r.count)}]
+					labels: searchResults.speakers.map(r => r.speaker_name),
+					datasets: [{data: searchResults.speakers.map(r => r.num)}]
 				}
 			});
 	
 			new Chart(yearsChart, {
 				type: 'bar',
 				data: {
-					labels: searchResults.years.map(r => r.category),
-					datasets: [{data: searchResults.years.map(r => r.count)}]
+					labels: searchResults.years.map(r => r.year),
+					datasets: [{data: searchResults.years.map(r => r.num)}]
 				}
 			});
 

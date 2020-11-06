@@ -28,14 +28,14 @@
                 if (l[col] && (col.endsWith('_on') || col.endsWith('_date'))) l[col] = dayjs(l[col]).format('MMMM D, YYYY');
             }
 
-            if (l.legislation_histories.length > 1) { 
+            if (l.legislation_histories && l.legislation_histories.length > 1) { 
                 const duration = dayjs.duration(dayjs(l.legislation_histories[0].date).diff(dayjs(l.legislation_histories[l.legislation_histories.length - 1].date)))
                 l.days = Math.round(duration.asDays());
             }
 
-            l.legislation_sponsors = lodash.sortBy(l.legislation_sponsors, [(s) => s.person.name]);
+            l.legislation_sponsors = lodash.sortBy(l.legislation_sponsors || [], [(s) => s.name]);
 
-            l.legislation_histories = l.legislation_histories.map(h => {
+            l.legislation_histories = (l.legislation_histories || []).map(h => {
                 h.date = dayjs(h.date).format('MMMM D, YYYY');
                 if (h.votes) h.votes = lodash.sortBy(h.votes, [(v) => v.person.name]);
                 return h
@@ -49,7 +49,6 @@
             return l;
         });
         loading.set(false);
-        console.log(searchResults);
 	}
 
 </script>
@@ -94,14 +93,14 @@
                                 <td>{h.action || ''}</td>
                                 <td>
                                     {h.result || ''}
-                                    {#if h.votes.length}<br><span class="action" on:click={e => h.showVotes = !h.showVotes}>Votes</span>{/if}
+                                    {#if h.votes && h.votes.length}<br><span class="action" on:click={e => h.showVotes = !h.showVotes}>Votes</span>{/if}
                                 </td>
                             </tr>
                             {#if h.showVotes}
                                 <tr>
                                     <td colspan="4" class="votes-row">
                                         {#each h.votes as v, i}
-                                            <strong>{v.person.name}</strong>: {v.vote}<br>
+                                            <strong>{v.person.name}</strong>: {v.vote.vote}<br>
                                         {/each}
                                     </td>
                                 </tr>
@@ -113,7 +112,7 @@
                 {#if r.legislation_sponsors.length}
                     <div class="row">
                         {#each r.legislation_sponsors as s} 
-                            <div class="tag black">{s.person.name}</div>
+                            <div class="tag black">{s.name}</div>
                         {/each}
                     </div>
                 {/if}
