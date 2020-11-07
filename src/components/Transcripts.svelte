@@ -5,8 +5,6 @@
 	import lodash from 'lodash';
 	import Chart from 'chart.js';
 
-	Chart.defaults.global.legend.display = false;
-
     export let query;
 
     let searchResults;
