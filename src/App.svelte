@@ -4,15 +4,22 @@
 	import Loader from './components/Loader.svelte';
 	import Transcripts from './components/Transcripts.svelte';
 	import Legislation from './components/Legislation.svelte';
+	import Stats from './components/Stats.svelte';
+	import Chart from 'chart.js';
+
+	Chart.defaults.global.legend.display = false;
 
 	let searchTerm;
-	let tab = 'legislation'
+	let pageTab = 'stats';
+	let searchTab = 'transcripts';
 
 	onMount(() => {
 		const searchParams = new URLSearchParams(window.location.search);
 		if (searchParams.get('q')) {
 			searchTerm = searchParams.get('q');
-			document.querySelector('input[name="query"]').value = searchTerm
+			const searchBar = document.querySelector('input[name="query"]')
+			if (searchBar) searchBar.value = searchTerm;
+			else window.history.pushState({}, document.title, "/");
 		}
 	})
 
@@ -35,27 +42,30 @@
 	{/if}
 
 	<div class="container">
-		<div class="row">
-			<h1>San Francisco Transcript Search</h1>
-			<small>
-				Search all transcripts from the <a href="https://sfgov.legistar.com/Calendar.aspx">San Francisco Board of Supervisors and Committee Meetings</a>
-			</small>
-		
+		<h1>San Francisco Data</h1>
+
+		<button class:button-primary={pageTab == 'stats'} on:click={e => pageTab = 'stats'}>Stats</button>
+		<button class:button-primary={pageTab == 'search'} on:click={e => pageTab = 'search'}>Search</button>
+
+		{#if pageTab == 'stats'}
+			<Stats/>
+		{:else if pageTab == 'search'}
 			<form on:submit|preventDefault={newSearch}>
 				<input type="text" name="query" required>
 				<button>Submit</button>
 			</form>
-		</div>
 
-		{#if searchTerm}
-		<button class:button-primary={tab == 'transcripts'} on:click={e => tab = 'transcripts'}>Transcripts</button>
-		<button class:button-primary={tab == 'legislation'} on:click={e => tab = 'legislation'}>Legislation</button>
-			{#if tab == 'transcripts'}
-				<Transcripts query={searchTerm}/>
-			{:else if tab == 'legislation'}
-				<Legislation query={searchTerm}/>
+			{#if searchTerm}
+				<button class:button-primary={searchTab == 'transcripts'} on:click={e => searchTab = 'transcripts'}>Transcripts</button>
+				<button class:button-primary={searchTab == 'legislation'} on:click={e => searchTab = 'legislation'}>Legislation</button>
+				{#if searchTab == 'transcripts'}
+					<Transcripts query={searchTerm}/>
+				{:else if searchTab == 'legislation'}
+					<Legislation query={searchTerm}/>
+				{/if}
 			{/if}
 		{/if}
+	
 		<hr>
 	
 		<a href="https://github.com/fordaaronj/sf-data-client" target="_blank">
