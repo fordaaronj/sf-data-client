@@ -21,4 +21,4 @@ async function searchLegislation(search) {
     return await api('/legislation', {q: search});
 }
 
-export { searchTranscripts, searchTranscriptsAggSpeakers, searchTranscriptsAggYears, searchLegislation }
+export { searchTranscripts, searchTranscriptsAggSpeakers, searchTranscriptsAggYears, searchLegislation, api }
