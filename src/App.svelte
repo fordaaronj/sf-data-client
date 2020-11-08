@@ -1,33 +1,20 @@
 <script>
-	import { onMount } from 'svelte';
 	import { loading } from './stores';
 	import Loader from './components/Loader.svelte';
-	import Transcripts from './components/Transcripts.svelte';
-	import Legislation from './components/Legislation.svelte';
+	import Home from './components/Home.svelte';
+	import Search from './components/Search.svelte';
+
 	import Stats from './components/Stats.svelte';
 	import Chart from 'chart.js';
+	import Router from 'svelte-spa-router';
+	import { location } from 'svelte-spa-router';
 
 	Chart.defaults.global.legend.display = false;
 
-	let searchTerm;
-	let pageTab = 'stats';
-	let searchTab = 'transcripts';
-
-	onMount(() => {
-		const searchParams = new URLSearchParams(window.location.search);
-		if (searchParams.get('q')) {
-			searchTerm = searchParams.get('q');
-			const searchBar = document.querySelector('input[name="query"]')
-			if (searchBar) searchBar.value = searchTerm;
-			else window.history.pushState({}, document.title, "/");
-		}
-	})
-
-	async function newSearch (e) {
-		searchTerm = e.currentTarget[0].value
-		const searchParams = new URLSearchParams();
-		searchParams.set('q', searchTerm);
-		history.pushState(null, '', window.location.pathname + '?' + searchParams.toString());
+	const routes = {
+		'/': Home,
+		'/search/:q?': Search,
+		'/stats': Stats
 	}
 
 </script>
@@ -44,27 +31,11 @@
 	<div class="container">
 		<h1>San Francisco Data</h1>
 
-		<button class:button-primary={pageTab == 'stats'} on:click={e => pageTab = 'stats'}>Stats</button>
-		<button class:button-primary={pageTab == 'search'} on:click={e => pageTab = 'search'}>Search</button>
+		<a href="/#/"><button class:button-primary={$location == '/'}>Home</button></a>
+		<a href="/#/stats"><button class:button-primary={$location == '/stats'}>Stats</button></a>
+		<a href="/#/search"><button class:button-primary={$location == '/search'}>Search</button></a>
 
-		{#if pageTab == 'stats'}
-			<Stats/>
-		{:else if pageTab == 'search'}
-			<form on:submit|preventDefault={newSearch}>
-				<input type="text" name="query" required>
-				<button>Submit</button>
-			</form>
-
-			{#if searchTerm}
-				<button class:button-primary={searchTab == 'transcripts'} on:click={e => searchTab = 'transcripts'}>Transcripts</button>
-				<button class:button-primary={searchTab == 'legislation'} on:click={e => searchTab = 'legislation'}>Legislation</button>
-				{#if searchTab == 'transcripts'}
-					<Transcripts query={searchTerm}/>
-				{:else if searchTab == 'legislation'}
-					<Legislation query={searchTerm}/>
-				{/if}
-			{/if}
-		{/if}
+		<Router {routes}/>
 	
 		<hr>
 	
@@ -82,13 +53,6 @@
 <style>
 	h1 {
 		margin-top: 50px;
-	}
-	form {
-		display: flex;
-		flex-direction: row;
-	}
-	form input {
-		flex-grow: 2;
 	}
 	.icon {
 		height: 25px;
