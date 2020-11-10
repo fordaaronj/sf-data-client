@@ -1,9 +1,8 @@
 <script>
-    import { loading } from '../stores';   
-	import { searchTranscripts, searchTranscriptsAggSpeakers, searchTranscriptsAggYears } from '../api';
+	import { api } from '../api';
 	import dayjs from 'dayjs';
 	import lodash from 'lodash';
-	import Chart from 'chart.js';
+	import Chart from './Chart.svelte'
 
     export let query;
 
@@ -11,60 +10,50 @@
     
     let page = 1;
 	let totalResults;
-	const searchLimit = 20;
+    const searchLimit = 20;
+    
+    let speakerChartConfig = {}
+    let mentionsChartConfig = {}
 
     // $ makes this reactive - re-runs the search whenever query changes
     $: search(query);
 
     async function search (query, changePage) {
-        loading.set(true);
 		if (changePage) {
             page += changePage;
-            searchResults.transcripts = await searchTranscripts(query, searchLimit, searchLimit * (page - 1));
+            searchResults.transcripts = (await api('/transcripts', {q: query, limit: searchLimit, offset: searchLimit * (page - 1)}));
 		} else {
             searchResults = null;
             page = 1;
 			searchResults = lodash.zipObject(['transcripts', 'speakers', 'years'], await Promise.all([
-				searchTranscripts(query, searchLimit, 0), 
-				searchTranscriptsAggSpeakers(query),
-				searchTranscriptsAggYears(query)
+                api('/transcripts', {q: query, limit: searchLimit, offset: 0}),
+                api('/transcripts/agg/speakers', {q: query}),
+                api('/transcripts/agg/years', {q: query})
             ]));
 	
-			totalResults = searchResults.years.map(r => r.num).reduce((a, b) => a + b, 0);
+			totalResults = searchResults.years.rows.map(r => r.num).reduce((a, b) => a + b, 0);
         }
 		
-		searchResults.transcripts = searchResults.transcripts.map(r => {
+		searchResults.transcripts.rows = searchResults.transcripts.rows.map(r => {
 			r.meeting.time_display = dayjs(r.meeting.time).format('MMM D, YYYY');
 			return r;
         });
         
-		loading.set(false);
+        if (changePage) return;
+        
+        speakerChartConfig = {
+            id: 'mentions-speakers',
+            title: 'Mentions by Speaker',
+            xLabels: searchResults.speakers.rows.map(r => r.speaker_name),
+            datasets: [{data: searchResults.speakers.rows.map(r => r.num)}],
+        }
 
-		if (changePage) return;
-
-		const intervalId = setInterval(() => {
-			const speakerChart = document.getElementById('speakers-chart');
-			const yearsChart = document.getElementById('years-chart');
-			if (!(speakerChart && yearsChart)) return;
-
-			new Chart(speakerChart, {
-				type: 'bar',
-				data: {
-					labels: searchResults.speakers.map(r => r.speaker_name),
-					datasets: [{data: searchResults.speakers.map(r => r.num)}]
-				}
-			});
-	
-			new Chart(yearsChart, {
-				type: 'bar',
-				data: {
-					labels: searchResults.years.map(r => r.year),
-					datasets: [{data: searchResults.years.map(r => r.num)}]
-				}
-			});
-
-			clearInterval(intervalId);
-		});
+        mentionsChartConfig = {
+            id: 'mentions-year',
+            title: 'Mentions by Year',
+            xLabels: searchResults.years.rows.map(r => r.year),
+            datasets: [{data: searchResults.years.rows.map(r => r.num)}]
+        }
 	}
 
 </script>
@@ -73,12 +62,14 @@
     {#if searchResults && searchResults.transcripts}
         <div class="row">
             <div class="six columns">
-                <label for="speakers-chart">Mentions by Speaker</label>
-                <canvas id="speakers-chart" width="400" height="200"></canvas>
+                {#if speakerChartConfig.datasets}
+                    <Chart config={speakerChartConfig}/>
+                {/if}
             </div>
             <div class="six columns">
-                <label for="years-chart">Mentions by Year</label>
-                <canvas id="years-chart" width="400" height="200"></canvas>
+                {#if mentionsChartConfig.datasets}
+                    <Chart config={mentionsChartConfig}/>
+                {/if}
             </div>
         </div>
         <table>
@@ -90,7 +81,7 @@
                 </tr>
             </thead>
             <tbody>
-                {#each searchResults.transcripts as r, i}
+                {#each searchResults.transcripts.rows as r, i}
                 <tr>
                     <td>
                         {r.meeting.committee}<br>
@@ -112,11 +103,11 @@
             </tbody>
         </table>
         <div style="text-align: right">
-            Results {searchLimit * (page - 1) + 1} to {searchLimit * (page - 1) + searchResults.transcripts.length} of {totalResults}<br>
+            Results {searchLimit * (page - 1) + 1} to {searchLimit * (page - 1) + searchResults.transcripts.rows.length} of {totalResults}<br>
             {#if page > 1}
                 <button on:click={() => search(query, -1)}>Previous</button>
             {/if}
-            {#if searchLimit * (page - 1) + searchResults.transcripts.length < totalResults}
+            {#if searchLimit * (page - 1) + searchResults.transcripts.rows.length < totalResults}
                 <button on:click={() => search(query, 1)}>Next</button>
             {/if}
         </div>

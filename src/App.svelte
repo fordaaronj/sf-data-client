@@ -4,7 +4,6 @@
 	import Home from './components/Home.svelte';
 	import Search from './components/Search.svelte';
 
-	import Stats from './components/Stats.svelte';
 	import Chart from 'chart.js';
 	import Router from 'svelte-spa-router';
 	import { location } from 'svelte-spa-router';
@@ -13,8 +12,7 @@
 
 	const routes = {
 		'/': Home,
-		'/search/:q?': Search,
-		'/stats': Stats
+		'/search/:q?': Search
 	}
 
 </script>
@@ -29,11 +27,11 @@
 	{/if}
 
 	<div class="container">
-		<h1>San Francisco Data</h1>
+		<h1>Golden City Data</h1>
+		<h4 class="subtitle">Budgets, Governance, and Outcomes in San Francisco</h4>
 
 		<a href="/#/"><button class:button-primary={$location == '/'}>Home</button></a>
-		<a href="/#/stats"><button class:button-primary={$location == '/stats'}>Stats</button></a>
-		<a href="/#/search"><button class:button-primary={$location == '/search'}>Search</button></a>
+		<a href="/#/search"><button class:button-primary={$location.startsWith('/search')}>Search</button></a>
 
 		<Router {routes}/>
 	
@@ -57,5 +55,8 @@
 	.icon {
 		height: 25px;
 		margin-right: 15px;
+	}
+	.subtitle {
+		color: gray;
 	}
 </style>

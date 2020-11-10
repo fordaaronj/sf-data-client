@@ -1,6 +1,5 @@
 <script>
-    import { loading } from '../stores';   
-    import { searchLegislation } from '../api';
+    import { api } from '../api';
     
     import lodash from 'lodash';
     
@@ -19,8 +18,7 @@
     const maxTitleLength = 300;
 
     async function search (query) {
-        loading.set(true);
-        searchResults = (await searchLegislation(query)).map(l => {
+        searchResults = (await api('/legislation', {q: query})).rows.map(l => {
             l.showFullTitle = l.title.length <= maxTitleLength;
             if (!l.showFullTitle) l.titleShort = l.title.substr(0, maxTitleLength).trim();
 
@@ -48,7 +46,6 @@
 
             return l;
         });
-        loading.set(false);
 	}
 
 </script>
