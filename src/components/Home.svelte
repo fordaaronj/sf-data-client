@@ -72,6 +72,29 @@
                 sources: results.sources
             }
         },
+        'test-results-math': async () => {
+            const results = await api('/education/test-results?subject=Math');
+
+            const years = []
+            const sets = {}
+
+            for (const r of results.rows) {
+                if (!years.includes(r.year)) years.push(r.year);
+                if (!sets[r.race]) sets[r.race] = {data: [], fill: false, label: r.race}
+                sets[r.race].data.push(r.percent_met_or_exceeded)
+            }
+
+            return {
+                id: 'test-results-math',
+                type: 'line',
+                title: '% of Standard Met or Exceeded, CA Smarter Balanced Test Results',
+                xLabels: years,
+                datasets: Object.values(sets),
+                xAxisLabel: 'Year',
+                suffix: '%',
+                sources: results.sources
+            }
+        },
         'votes-yes': async () => {
             const results = await api('/legislation/votes/yes');
 
@@ -125,6 +148,7 @@
         <select bind:value={chartOutcomes}>
             <option value="311-homeless" selected>311: Homeless Cases</option>
             <option value="housing-affordability">Housing Affordability</option>
+            <option value="test-results-math">Test Results: Math</option>
         </select>
         {#await getChart(chartOutcomes) then c}
             <Chart config={c}/>
