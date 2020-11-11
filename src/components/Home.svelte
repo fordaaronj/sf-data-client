@@ -46,6 +46,19 @@
                 sources: results.sources
             }
         },
+        'housing-affordability': async () => {
+            const results = await api('/affordability/housing');
+
+            return {
+                id: 'housing-affordability',
+                title: '% of Households That Can Afford a Median Priced Home',
+                xLabels: results.rows.map(r => r.year),
+                datasets: [{data: results.rows.map(r => r.value)}],
+                xAxisLabel: 'Year',
+                suffix: '%',
+                sources: results.sources
+            }
+        },
         'outcomes': async () => {
             const results = await api('/legislation/outcomes');
 
@@ -111,6 +124,7 @@
     <div class="nine columns">
         <select bind:value={chartOutcomes}>
             <option value="311-homeless" selected>311: Homeless Cases</option>
+            <option value="housing-affordability">Housing Affordability</option>
         </select>
         {#await getChart(chartOutcomes) then c}
             <Chart config={c}/>
