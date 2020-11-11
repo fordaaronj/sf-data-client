@@ -4,11 +4,8 @@
 	import Home from './components/Home.svelte';
 	import Search from './components/Search.svelte';
 
-	import Chart from 'chart.js';
 	import Router from 'svelte-spa-router';
 	import { location } from 'svelte-spa-router';
-
-	Chart.defaults.global.legend.display = false;
 
 	const routes = {
 		'/': Home,
