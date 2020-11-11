@@ -1,19 +1,34 @@
 <script>
     import { onMount } from 'svelte';
+    import Chart from 'chart.js';
+    import 'chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes';
+    import { Median6 } from 'chartjs-plugin-colorschemes/src/colorschemes/colorschemes.office';
     export let config;
 
     onMount(() => {
         new Chart(document.getElementById('chart-' + config.id), {
-            type: 'bar',
+            type: config.type || 'bar',
             data: {
                 labels: config.xLabels,
                 datasets: config.datasets,
             },
             options: {
+                plugins: {
+                    colorschemes: {
+                        scheme: Median6
+                    }
+                },
+                legend: {
+                    display: config.datasets.length > 1
+                },
                 tooltips: {
+                    mode: 'index',
+                    intersect: false,
+                    position: 'nearest',
                     callbacks: {
                         label: (tooltipItem, data) => {
-                            let label = config.title + ': ';
+                            let label = ''
+                            if (config.datasets.length > 1) label += config.datasets[tooltipItem.datasetIndex].label + ': ';
                             label += (config.prefix || '') + tooltipItem.yLabel.toLocaleString() + (config.suffix || '');
                             return label;
                         }
