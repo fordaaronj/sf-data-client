@@ -217,7 +217,7 @@
 
 <div class="row">
     <div class="three columns">
-        <h5>Budget</h5>
+        <h4>Budget</h4>
         <p>
             San Francisco has the <a href="https://www.usnews.com/news/cities/slideshows/us-cities-with-the-biggest-general-revenues-per-capita?slide=11" target="_blank">largest per capita budget of any city in the United States</a>.
         </p>
@@ -245,7 +245,7 @@
 
 <div class="row">
     <div class="three columns">
-        <h5>Outcomes</h5>
+        <h4>Outcomes</h4>
         <p>
             Despite SF's massive and growing budget, key measures of livability continue to stagnate or deteriorate. 
         </p>
@@ -276,7 +276,7 @@
 
 <div class="row">
     <div class="three columns">
-        <h5>Governance</h5>
+        <h4>Governance</h4>
         <p>
             Meanwhile, the Board of Supervisors is increasingly exhibiting <a href="https://en.wikipedia.org/wiki/Groupthink" target="_blank">groupthink</a>. 
         </p>
@@ -301,6 +301,6 @@
     button.chart {
         text-transform: none;
         padding: 0 15px;
-        font-weight: 100;
+        font-weight: normal;
     }
 </style>
