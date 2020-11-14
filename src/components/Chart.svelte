@@ -5,6 +5,9 @@
     import { Median6 } from 'chartjs-plugin-colorschemes/src/colorschemes/colorschemes.office';
     export let config;
 
+    let height = 220;
+    if (window.innerWidth < 550) height = 350;
+
     const yAxes = (config.datasets.find(d => d.yAxisID) ? ['left', 'right'] : ['left']).map((axisId, index) => {
         let prefix = config.prefix;
         let suffix = config.suffix;
@@ -74,14 +77,12 @@
             }
         });
     });
-
-    console.log
 </script>
 
 {#if config.title}
     <label for="chart">{config.title}</label>
 {/if}
-<canvas id="chart-{config.id}" width="400" height="220"></canvas>
+<canvas id="chart-{config.id}" width="400" height={height}></canvas>
 {#if config.sources}
     <small>Source{#if config.sources.length > 1}s{/if}:</small>
     {#each config.sources as s, i}
