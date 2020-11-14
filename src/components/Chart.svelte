@@ -5,6 +5,29 @@
     import { Median6 } from 'chartjs-plugin-colorschemes/src/colorschemes/colorschemes.office';
     export let config;
 
+    const yAxes = (config.datasets.find(d => d.yAxisID) ? ['left', 'right'] : ['left']).map((axisId, index) => {
+        let prefix = config.prefix;
+        let suffix = config.suffix;
+        let yAxisLabel = config.yAxisLabel;
+        if (Array.isArray(suffix)) suffix = suffix[index];
+        if (Array.isArray(prefix)) prefix = prefix[index];
+        if (Array.isArray(yAxisLabel)) yAxisLabel = yAxisLabel[index];
+        return {
+            id: axisId,
+            position: axisId,
+            scaleLabel: {
+                display: yAxisLabel ? true : false,
+                labelString: yAxisLabel
+            },
+            ticks: {
+                beginAtZero: true,
+                callback: (value, index, values) => {
+                    return (prefix || '') + value.toLocaleString() + (suffix || '')
+                }
+            }
+        }
+    });
+
     onMount(() => {
         new Chart(document.getElementById('chart-' + config.id), {
             type: config.type || 'bar',
@@ -28,8 +51,13 @@
                     callbacks: {
                         label: (tooltipItem, data) => {
                             let label = ''
+                            let suffix = config.suffix || '';
+                            let prefix = config.prefix || '';
+                            if (Array.isArray(suffix)) suffix = suffix[tooltipItem.datasetIndex] || '';
+                            if (Array.isArray(prefix)) prefix = prefix[tooltipItem.datasetIndex] || '';
+
                             if (config.datasets.length > 1) label += config.datasets[tooltipItem.datasetIndex].label + ': ';
-                            label += (config.prefix || '') + tooltipItem.yLabel.toLocaleString() + (config.suffix || '');
+                            label += prefix + tooltipItem.yLabel.toLocaleString() + suffix;
                             return label;
                         }
                     }
@@ -41,23 +69,19 @@
                             labelString: config.xAxisLabel || null
                         }
                     }],
-                    yAxes: [{
-                        ticks: {
-                            callback: (value, index, values) => {
-                                return (config.prefix || '') + value.toLocaleString() + (config.suffix || '')
-                            }
-                        }
-                    }]
+                    yAxes: yAxes
                 }
             }
         });
     });
+
+    console.log
 </script>
 
 {#if config.title}
     <label for="chart">{config.title}</label>
 {/if}
-<canvas id="chart-{config.id}" width="400" height="180"></canvas>
+<canvas id="chart-{config.id}" width="400" height="220"></canvas>
 {#if config.sources}
     <small>Source{#if config.sources.length > 1}s{/if}:</small>
     {#each config.sources as s, i}

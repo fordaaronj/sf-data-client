@@ -25,10 +25,10 @@
 
 	<div class="container">
 		<h1>Golden City Data</h1>
-		<h4 class="subtitle">Budgets, Governance, and Outcomes in San Francisco</h4>
+		<h4 class="subtitle">Budgets, Outcomes, and Governance in San Francisco</h4>
 
 		<a href="/#/"><button class:button-primary={$location == '/'}>Home</button></a>
-		<a href="/#/search"><button class:button-primary={$location.startsWith('/search')}>Search</button></a>
+		<a href="/#/search"><button class:button-primary={$location.startsWith('/search')}>Legislation & Transcripts</button></a>
 
 		<Router {routes}/>
 	
