@@ -13,4 +13,4 @@ Front end for [goldencitydata.com](https://www.goldencitydata.com).
 
 - [Chart.js](https://www.chartjs.org/)
 - [Svelte](https://svelte.dev/)
-- [Skeloton](http://getskeleton.com/)
+- [Skeleton](http://getskeleton.com/)
