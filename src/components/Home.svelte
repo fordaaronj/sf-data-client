@@ -184,6 +184,37 @@
                 sources: results.sources
             }
         },
+        'transportation-share': async () => {
+            const results = await api('/transportation/share');
+
+            const sustainableByYear = results.rows.reduce((p, c) => {
+                if (!p[c.fiscal_year]) p[c.fiscal_year] = 0;
+                if (['Bicycle', 'Transit', 'Walk'].includes(c.mode)) p[c.fiscal_year] += c.percent_share;
+                return p;
+            }, {});
+
+            callouts.outcomes = `
+                Since ${Object.keys(sustainableByYear)[0]}, the share of trips that are sustainable (biking, walking, or transit)
+                has fallen from ${Object.values(sustainableByYear)[0]}% to 
+                ${Object.values(sustainableByYear)[Object.values(sustainableByYear).length - 1]}%
+            `
+
+            const datasets = results.rows.reduce((p, c) => {
+                if (!p[c.mode]) p[c.mode] = {data: [], label: c.mode}
+                p[c.mode].data.push(c.percent_share);
+                return p
+            }, {})
+
+            return {
+                id: 'transportation-share',
+                title: 'Transportation: Share of Trips',
+                xLabels: Object.keys(sustainableByYear),
+                datasets: Object.values(datasets),
+                xAxisLabel:  'Fiscal Year',
+                suffix: '%',
+                sources: results.sources
+            }
+        },
         'votes-yes': async () => {
             const results = await api('/legislation/votes/yes');
 
@@ -255,7 +286,7 @@
     </div>
     <div class="nine columns">
         <button class:button-primary={chartOutcomes == '311-homeless'} class="chart" on:click={() => chartOutcomes = '311-homeless'}>
-            311: Homeless Cases
+            311: Homeless
         </button>
         <button class:button-primary={chartOutcomes == 'housing-affordability'} class="chart" on:click={() => chartOutcomes = 'housing-affordability'}>
             Housing Affordability
@@ -265,6 +296,9 @@
         </button>
         <button class:button-primary={chartOutcomes == 'test-results-math'} class="chart" on:click={() => chartOutcomes = 'test-results-math'}>
             Test Results: Math
+        </button>
+        <button class:button-primary={chartOutcomes == 'transportation-share'} class="chart" on:click={() => chartOutcomes = 'transportation-share'}>
+            Transportation Modes
         </button>
         {#await getChart(chartOutcomes) then c}
             <Chart config={c}/>
@@ -278,7 +312,7 @@
     <div class="three columns">
         <h4>Governance</h4>
         <p>
-            Meanwhile, the Board of Supervisors is increasingly exhibiting <a href="https://en.wikipedia.org/wiki/Groupthink" target="_blank">groupthink</a>. 
+            Meanwhile, the Board of Supervisors seems to be increasingly exhibiting <a href="https://en.wikipedia.org/wiki/Groupthink" target="_blank">groupthink</a>. 
         </p>
 
         <Callout callout={callouts.governance}/>
