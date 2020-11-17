@@ -27,7 +27,8 @@
                 callback: (value, index, values) => {
                     return (prefix || '') + value.toLocaleString() + (suffix || '')
                 }
-            }
+            },
+            stacked: config.stacked === true
         }
     });
 
@@ -70,7 +71,8 @@
                         scaleLabel: {
                             display: config.xAxisLabel ? true : false,
                             labelString: config.xAxisLabel || null
-                        }
+                        },
+                        stacked: config.stacked === true
                     }],
                     yAxes: yAxes
                 }
@@ -83,6 +85,9 @@
     <label for="chart">{config.title}</label>
 {/if}
 <canvas id="chart-{config.id}" width="400" height={height}></canvas>
+{#if config.subtitle}
+    <small>Note: {config.subtitle}</small><br>
+{/if}
 {#if config.sources}
     <small>Source{#if config.sources.length > 1}s{/if}:</small>
     {#each config.sources as s, i}
