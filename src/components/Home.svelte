@@ -3,7 +3,7 @@
     import Callout from './Callout.svelte';
     import { api } from '../api';
 
-    let chartBudget = 'budget-per-resident';
+    let chartBudget = 'annual-budget';
     let chartOutcomes = '311-homeless';
     let chartGovernance = 'votes-yes';
     let callouts = {}
@@ -36,20 +36,26 @@
                 xAxisLabel: 'Year Opened'
             }
         },
-        'budget-per-resident': async () => {
-            const results = await api('/budget/per-person');
+        'annual-budget': async () => {
+            const results = await api('/budget/summary');
 
-            const growth = getGrowth(results.rows, 'year', 'budget_per_person')
+            const earliestYear = results.rows[0].fiscal_year;
+            const totalSpend = Math.round(results.rows.reduce((p, c) => {
+                p += c.budget_millions / 1000;
+                return p;
+            }, 0)).toLocaleString();
 
-            callouts.budget = `Since ${growth.earliestYear}, SF's budget per resident has grown by ${growth.growth}`
+            callouts.budget = `Since ${earliestYear}, San Francisco has spent a combined $${totalSpend}B`;
 
             return {
-                id: 'budget-per-person',
-                title: 'Budget Per Resident',
-                xLabels: results.rows.map(r => r.year),
-                datasets: [{data: results.rows.map(r => Math.round(r.budget_per_person))}],
-                xAxisLabel: 'Year',
+                id: 'annual-budget',
+                title: 'Annual Budget',
+                xLabels: results.rows.map(r => r.fiscal_year),
+                datasets: [{data: results.rows.map(r => r.budget_millions)}],
+                subtitle: 'Excludes expenditures related to SFO, the MTA, and the Port of San Francisco',
+                xAxisLabel: 'Fiscal Year',
                 prefix: '$',
+                suffix: 'M',
                 sources: results.sources
             }
         },
@@ -250,15 +256,15 @@
     <div class="three columns">
         <h4>Budget</h4>
         <p>
-            San Francisco has the <a href="https://www.usnews.com/news/cities/slideshows/us-cities-with-the-biggest-general-revenues-per-capita?slide=11" target="_blank">largest per capita budget of any city in the United States</a>.
+            San Francisco has incredible financial resources at its disposal.
         </p>
 
         <Callout callout={callouts.budget}/>
 
     </div>
     <div class="nine columns">
-        <button class:button-primary={chartBudget == 'budget-per-resident'} class="chart" on:click={() => chartBudget = 'budget-per-resident'}>
-            Budget Per Resident
+        <button class:button-primary={chartBudget == 'annual-budget'} class="chart" on:click={() => chartBudget = 'annual-budget'}>
+            Annual Budget
         </button>
         <button class:button-primary={chartBudget == 'budget-business-taxes'} class="chart" on:click={() => chartBudget = 'budget-business-taxes'}>
             Business Taxes
